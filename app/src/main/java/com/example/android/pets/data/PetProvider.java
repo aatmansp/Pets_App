@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 public class PetProvider extends ContentProvider {
     /** Tag for the log messages */
@@ -32,9 +33,7 @@ public class PetProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        // TODO: Create and initialize a PetDbHelper object to gain access to the pets database.
-        // Make sure the variable is a global variable, so it can be referenced from other
-        // ContentProvider methods.
+
         mDbHelper = new PetDbHelper(getContext());
 
         return true;
@@ -75,7 +74,31 @@ public class PetProvider extends ContentProvider {
      */
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
-        return null;
+
+        final int match = sUriMatcher.match(uri);
+        switch (match){
+            case PETS:{
+                return insertPet(uri,contentValues);
+            }
+            default:{
+                throw new IllegalArgumentException("Insertion is not supported for : " + uri);
+            }
+        }
+    }
+
+    private Uri insertPet(Uri uri, ContentValues values){
+
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        long id = database.insert(PetContract.PetEntry.TABLE_NAME,null,values);
+
+        if(id==-1){
+            Log.e(LOG_TAG, "insertPet: Failed to inser pet for  "+uri);
+            return null;
+        }
+
+        return ContentUris.withAppendedId(uri,id);
+
     }
 
     /**

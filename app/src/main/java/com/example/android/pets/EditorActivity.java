@@ -2,7 +2,9 @@
 package com.example.android.pets;
 
 import android.content.ContentValues;
+import android.content.UriMatcher;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import com.example.android.pets.data.PetContract;
 import com.example.android.pets.data.PetContract.PetEntry;
 import com.example.android.pets.data.PetDbHelper;
+
 
 /**
  * Allows user to create a new pet or edit an existing one.
@@ -37,7 +40,7 @@ public class EditorActivity extends AppCompatActivity {
     /** EditText field to enter the pet's gender */
     private Spinner mGenderSpinner;
 
-    private PetDbHelper mDbHelper;
+
 
     /**
      * Gender of the pet. The possible values are:
@@ -56,7 +59,7 @@ public class EditorActivity extends AppCompatActivity {
         mWeightEditText = (EditText) findViewById(R.id.edit_pet_weight);
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
-        mDbHelper = new PetDbHelper(this);
+
 
         setupSpinner();
     }
@@ -100,15 +103,15 @@ public class EditorActivity extends AppCompatActivity {
         });
     }
 
+
+
     private void insertPet(){
         String nameString = mNameEditText.getText().toString().trim();
         String breedString = mBreedEditText.getText().toString().trim();
         String weightString = mWeightEditText.getText().toString().trim();
         int weight = Integer.parseInt(weightString);
 
-        mDbHelper = new PetDbHelper(this);
 
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(PetEntry.COLUMN_PET_NAME , nameString);
@@ -116,12 +119,12 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetEntry.COLUMN_PET_GENDER, mGender );
         values.put(PetEntry.COLUMN_PET_WEIGHT , weight);
 
-        long newRowId = db.insert(PetEntry.TABLE_NAME , null ,values);
+        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI,values);
 
-        if (newRowId == -1) {
-            Toast.makeText(this , "Error with saving pet", Toast.LENGTH_SHORT).show();
+        if (newUri == null) {
+            Toast.makeText(this , getString(R.string.editor_insert_pet_failed), Toast.LENGTH_SHORT).show();
         } else{
-            Toast.makeText(this, "Pet saved with rowId:" + newRowId , Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.editor_insert_pet_successful), Toast.LENGTH_SHORT).show();
         }
     }
 
