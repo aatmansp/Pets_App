@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.android.pets.data.PetContract;
@@ -78,45 +79,20 @@ public class CatalogActivity extends AppCompatActivity {
                 null ,
                 null);
 
-        TextView displayView = (TextView) findViewById(R.id.text_view_pet);
 
-        try {
+        ListView petListView = (ListView) findViewById(R.id.list);
 
-            displayView.setText("Number of rows in pets database table: " + cursor.getCount());
-            displayView.append("\n" +PetEntry._ID+" - "
-            + PetEntry.COLUMN_PET_NAME + " - "
-            + PetEntry.COLUMN_PET_BREED + " - "
-            + PetEntry.COLUMN_PET_GENDER+ " - "
-            + PetEntry.COLUMN_PET_WEIGHT+ "\n");
+        View emptyView = findViewById(R.id.empty_view);
+        petListView.setEmptyView(emptyView);
 
-            int idColumnIndex= cursor.getColumnIndex(PetEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
-            int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
-            int genderColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
-            int wightColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
-
-            while(cursor.moveToNext()){
-                int currentId = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                String currentBreed = cursor.getString(breedColumnIndex);
-                int currentGender = cursor.getInt(genderColumnIndex);
-                int currentWeight = cursor.getInt(wightColumnIndex);
-
-                displayView.append("\n" + currentId + " - " +
-                        currentName + " - " +
-                        currentBreed+ " - " +
-                        currentGender + " - " +
-                        currentWeight  );
-            }
+        PetCursorAdaptor adaptor = new PetCursorAdaptor(this,cursor);
+        petListView.setAdapter(adaptor);
 
 
 
 
-        } finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            cursor.close();
-        }
+
+
     }
 
     @Override
@@ -145,8 +121,6 @@ public class CatalogActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu options from the res/menu/menu_catalog.xml file.
-        // This adds menu items to the app bar.
         getMenuInflater().inflate(R.menu.menu_catalog, menu);
         return true;
     }
