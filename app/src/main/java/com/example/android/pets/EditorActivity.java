@@ -123,11 +123,18 @@ public class EditorActivity extends AppCompatActivity implements
         });
     }
 
-    private void insertPet() {
+    private void savePet() {
         String nameString = mNameEditText.getText().toString().trim();
         String breedString = mBreedEditText.getText().toString().trim();
         String weightString = mWeightEditText.getText().toString().trim();
-        int weight = Integer.parseInt(weightString);
+        if (mCurrentPetUri == null &&
+                TextUtils.isEmpty(nameString) && TextUtils.isEmpty(breedString) &&
+                TextUtils.isEmpty(weightString) && mGender == PetEntry.GENDER_UNKNOWN) {return;}
+        int weight = 0;
+        if(!TextUtils.isEmpty(weightString)){
+            weight = Integer.parseInt(weightString);
+        }
+
 
         ContentValues values = new ContentValues();
         values.put(PetEntry.COLUMN_PET_NAME, nameString);
@@ -135,14 +142,26 @@ public class EditorActivity extends AppCompatActivity implements
         values.put(PetEntry.COLUMN_PET_GENDER, mGender);
         values.put(PetEntry.COLUMN_PET_WEIGHT, weight);
 
-        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
+        if(mCurrentPetUri == null) {
+            Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
 
-        if (newUri == null) {
-            Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
-                    Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
-                    Toast.LENGTH_SHORT).show();
+            if (newUri == null) {
+                Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else{
+            int rowsAffected = getContentResolver().update(mCurrentPetUri,values,null,null);
+
+            if(rowsAffected == 0){
+                Toast.makeText(this, getString(R.string.editor_update_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else{
+                Toast.makeText(this, getString(R.string.editor_update_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -156,9 +175,7 @@ public class EditorActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                // Save pet to database
-                insertPet();
-                // Exit activity
+                savePet();
                 finish();
                 return true;
             // Respond to a click on the "Delete" menu option
@@ -232,6 +249,6 @@ public class EditorActivity extends AppCompatActivity implements
         mNameEditText.setText("");
         mBreedEditText.setText("");
         mWeightEditText.setText("");
-        mGenderSpinner.setSelection(0); 
+        mGenderSpinner.setSelection(0);
     }
 }
