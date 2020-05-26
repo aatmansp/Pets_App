@@ -67,6 +67,7 @@ public class PetProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot query unknown uri "+uri);
         }
 
+        cursor.setNotificationUri(getContext().getContentResolver(),uri);
         return cursor;
     }
 
@@ -109,9 +110,11 @@ public class PetProvider extends ContentProvider {
         long id = database.insert(PetContract.PetEntry.TABLE_NAME,null,values);
 
         if(id==-1){
-            Log.e(LOG_TAG, "insertPet: Failed to inser pet for  "+uri);
+            Log.e(LOG_TAG, "insertPet: Failed to insert pet for  "+uri);
             return null;
         }
+
+        getContext().getContentResolver().notifyChange(uri,null);
 
         return ContentUris.withAppendedId(uri,id);
 
@@ -168,9 +171,13 @@ public class PetProvider extends ContentProvider {
 
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
-        return database.update(PetContract.PetEntry.TABLE_NAME,values,selection ,selectionArgs);
+        int rowsUpdated = database.update(PetContract.PetEntry.TABLE_NAME,values,selection ,selectionArgs);
 
+        if(rowsUpdated != 0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
 
+        return rowsUpdated;
     }
 
     /**
@@ -180,20 +187,29 @@ public class PetProvider extends ContentProvider {
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
+        int rowsDeleted;
         int match = sUriMatcher.match(uri);
         switch (match){
             case PETS:{
-                return database.delete(PetEntry.TABLE_NAME,selection,selectionArgs);
+                rowsDeleted= database.delete(PetEntry.TABLE_NAME,selection,selectionArgs);
+                break;
             }
             case PETS_ID:{
                 selection = PetEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                return database.delete(PetEntry.TABLE_NAME,selection,selectionArgs);
+                rowsDeleted =  database.delete(PetEntry.TABLE_NAME,selection,selectionArgs);
+                break;
             }
             default:{
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
             }
         }
+
+        if(rowsDeleted!=0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
+
+        return rowsDeleted;
 
     }
 

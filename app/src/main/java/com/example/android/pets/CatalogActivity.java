@@ -56,7 +56,16 @@ public class CatalogActivity extends AppCompatActivity implements
         petListView.setAdapter(mCursorAdapter);
 
 
+        petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position , long id) {
+                Intent intent = new Intent(CatalogActivity.this , EditorActivity.class);
 
+                Uri contentUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI,id);
+                intent.setData(contentUri);
+                startActivity(intent);
+            }
+        });
 
         getLoaderManager().initLoader(PET_LOADER, null, this);
     }
@@ -110,7 +119,7 @@ public class CatalogActivity extends AppCompatActivity implements
                 PetEntry.COLUMN_PET_NAME,
                 PetEntry.COLUMN_PET_BREED };
 
-   
+
         return new CursorLoader(this,   // Parent activity context
                 PetEntry.CONTENT_URI,   // Provider content URI to query
                 projection,             // Columns to include in the resulting Cursor
