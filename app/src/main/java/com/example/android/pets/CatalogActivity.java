@@ -25,10 +25,8 @@ import com.example.android.pets.data.PetContract.PetEntry;
 public class CatalogActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
-    /** Identifier for the pet data loader */
     private static final int PET_LOADER = 0;
 
-    /** Adapter for the ListView */
     PetCursorAdaptor mCursorAdapter;
 
     @Override
@@ -36,7 +34,6 @@ public class CatalogActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
 
-        // Setup FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,6 +67,7 @@ public class CatalogActivity extends AppCompatActivity implements
         getLoaderManager().initLoader(PET_LOADER, null, this);
     }
 
+
     private void insertPet() {
 
         ContentValues values = new ContentValues();
@@ -97,13 +95,10 @@ public class CatalogActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
-            // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
                 insertPet();
                 return true;
-            // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
                 deleteAllPets();
                 return true;
@@ -113,19 +108,18 @@ public class CatalogActivity extends AppCompatActivity implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        // Define a projection that specifies the columns from the table we care about.
         String[] projection = {
                 PetEntry._ID,
                 PetEntry.COLUMN_PET_NAME,
                 PetEntry.COLUMN_PET_BREED };
 
 
-        return new CursorLoader(this,   // Parent activity context
-                PetEntry.CONTENT_URI,   // Provider content URI to query
-                projection,             // Columns to include in the resulting Cursor
-                null,                   // No selection clause
-                null,                   // No selection arguments
-                null);                  // Default sort order
+        return new CursorLoader(this,
+                PetEntry.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null);
     }
 
     @Override
